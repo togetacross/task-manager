@@ -1,0 +1,3 @@
+2022-07-12 15:12:57 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT WORKLOG0_.ID AS ID1_1_, WORKLOG0_.COMMENT AS COMMENT2_1_, WORKLOG0_.TASK_ID AS TASK_ID5_1_, WORKLOG0_.WORK_END AS WORK_END3_1_, WORKLOG0_.WORK_START AS WORK_STA4_1_ FROM WORKLOG WORKLOG0_ LEFT OUTER JOIN TASK TASK1_ ON WHERE[*] TASK1_.ID=?"; expected "NOT, EXISTS, INTERSECTS, UNIQUE"; SQL statement:
+select worklog0_.id as id1_1_, worklog0_.comment as comment2_1_, worklog0_.task_id as task_id5_1_, worklog0_.work_end as work_end3_1_, worklog0_.work_start as work_sta4_1_ from worklog worklog0_ left outer join task task1_ on where task1_.id=? [42001-200]
