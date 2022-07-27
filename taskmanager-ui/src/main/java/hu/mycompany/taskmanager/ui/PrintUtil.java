@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 public class PrintUtil {
 
     private final static int TABLE_COL_MARGIN = 2;
-    private final static int TABLE_COL_MIN_WIDTH = 15;
+    private final static int TABLE_COL_MIN_WIDTH = 10;
 
     public static void printTable(List<String[]> tableRows, String[] header) {
         if (!tableRows.isEmpty()) {

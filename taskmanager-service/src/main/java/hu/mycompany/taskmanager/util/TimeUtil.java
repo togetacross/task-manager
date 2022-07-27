@@ -5,12 +5,15 @@
  */
 package hu.mycompany.taskmanager.util;
 
+import hu.mycompany.taskmanager.service.TaskService;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -21,7 +24,7 @@ public class TimeUtil {
     private static final String DATE_FORMAT = "dd/MM/yyyy";
     private static final String DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm";
     private static final String OFFSET_DATE_TIME_FORMAT = "yyyy/MM/dd hh:mm O";
-
+    private static final Logger logger = LoggerFactory.getLogger(TaskService.class);
 
     public static LocalDate parseLocalDate(String dateString) {
         LocalDate localDate = null;
@@ -29,7 +32,7 @@ public class TimeUtil {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
             localDate = LocalDate.parse(dateString, formatter);
         } catch (DateTimeParseException ex) {
-            System.out.println(ex);
+            logger.warn(ex.getMessage());
         }
         return localDate;
     }
@@ -40,7 +43,7 @@ public class TimeUtil {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
             localDateTimeFormat = localDateTime.format(formatter);
         } catch (DateTimeParseException ex) {
-            System.out.println(ex);
+            logger.warn(ex.getMessage());
         }
         return localDateTimeFormat;
     }

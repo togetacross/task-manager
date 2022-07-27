@@ -44,5 +44,5 @@ public class WorkLog implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
     private Task task;
-    
+  
 }
