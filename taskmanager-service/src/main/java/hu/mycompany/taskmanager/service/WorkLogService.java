@@ -9,65 +9,79 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Gerdan Tibor
  */
 public class WorkLogService {
-
+    
     private final WorkLogDao workLogDao;
-
+    private static final Logger logger = LoggerFactory.getLogger(WorkLogService.class);
+    
     public WorkLogService() {
         workLogDao = new WorkLogDaoImpl();
     }
-
+    
     public void start(int taskId, String comment) {
-        if (workLogDao.findLast(taskId).getWorkEnd() != null) {
-            WorkLog workLog = new WorkLog();
-            workLog.setWorkStart(OffsetDateTime.now(ZoneId.systemDefault()));
-            workLog.setComment(comment);
-            workLogDao.save(workLog, taskId);
-        } else {
-            System.out.println("There is already a work in progress!");
-        }
+        workLogDao.findLastStartTimeByTaskIdAndEndTimeIsNull(taskId).ifPresentOrElse(workLog -> {
+            logger.info("There is a work in progress!");
+        }, () -> {
+            WorkLog newWorkLog = new WorkLog();
+            newWorkLog.setWorkStart(OffsetDateTime.now(ZoneId.systemDefault()));
+            newWorkLog.setComment(comment);
+            workLogDao.save(newWorkLog, taskId);
+        });
     }
-
+    
     public void finsh(int taskId) {
-        WorkLog workLog = workLogDao.findLast(taskId);
-        if (workLog.getWorkEnd() == null) {
-            workLogDao.updateWithEndTime(workLog.getId(), OffsetDateTime.now(ZoneId.systemDefault()));
-        } else {
-            System.out.println("There is no work in progress!");
-        }
+        workLogDao.findLastStartTimeByTaskIdAndEndTimeIsNull(taskId).ifPresentOrElse(workLog -> {
+            workLog.setWorkEnd(OffsetDateTime.now(ZoneId.systemDefault()));
+            workLogDao.update(workLog);
+        }, () -> logger.info("There is no work in progress!"));
     }
-
+    
     public List<String[]> getAllByTaskId(int id) {
         return convertListToTaskArrayList(workLogDao.findAllByTaskId(id));
     }
-
+    
+    public String getAllWorkedTime(int taskId) {
+        Duration duration = Duration.ZERO;
+        long miliSeconds = workLogDao
+                .findAllByTaskId(taskId)
+                .stream()
+                .map(workLog -> {
+                    return TimeUtil.getDuration(
+                            workLog.getWorkStart(),
+                            workLog.getWorkEnd() != null ? workLog.getWorkEnd() : OffsetDateTime.now(ZoneId.systemDefault())
+                    ).toMillis();
+                }).collect(Collectors.summingLong(Long::longValue));
+        return TimeUtil.formatDuration(duration.plusMillis(miliSeconds));
+    }
+    
     private List<String[]> convertListToTaskArrayList(List<WorkLog> workLogList) {
         return workLogList
                 .stream()
                 .map(workLog -> {
-                    String durationFormat;
                     String workStart = TimeUtil.formatLocalDateTime(workLog.getWorkStart().toLocalDateTime());
                     String workEnd;
+                    Duration duration;
                     if (workLog.getWorkEnd() != null) {
-                        Duration duration = TimeUtil.getDuration(workLog.getWorkStart(), workLog.getWorkEnd());
-                        durationFormat = TimeUtil.formatDuration(duration);
+                        duration = TimeUtil.getDuration(workLog.getWorkStart(), workLog.getWorkEnd());
                         workEnd = TimeUtil.formatLocalDateTime(workLog.getWorkEnd().toLocalDateTime());
                     } else {
-                        durationFormat = "-";
+                        duration = TimeUtil.getDuration(workLog.getWorkStart(), OffsetDateTime.now(ZoneId.systemDefault()));
                         workEnd = "In progress";
                     }
                     return new String[]{
-                        durationFormat,
+                        TimeUtil.formatDuration(duration),
                         workStart + " - " + workEnd,
                         workLog.getComment()
                     };
                 })
                 .collect(Collectors.toList());
     }
-
+    
 }

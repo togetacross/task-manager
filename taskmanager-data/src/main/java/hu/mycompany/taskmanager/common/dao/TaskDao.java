@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hu.mycompany.taskmanager.common.dao;
 
 import hu.mycompany.taskmanager.common.entity.Priority;
@@ -18,9 +13,11 @@ public interface TaskDao {
     
     void save(Task task);
     
+    void deleteById(int taskId);
+    
     List<Task> findAll();
     
-    void finish(int Id);
+    void updateIsCompleted(int Id, boolean isCompleted);
     
     List<Task> findAllByAfterCreatedAndIsCompletedAndPriority(OffsetDateTime createdAt, boolean isCompleted, Priority priority);
     

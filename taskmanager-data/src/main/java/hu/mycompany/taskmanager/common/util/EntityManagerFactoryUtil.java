@@ -9,22 +9,19 @@ import javax.persistence.Persistence;
  */
 public class EntityManagerFactoryUtil {
 
-    private static final EntityManagerFactory entityManagerFactory;
+    private static EntityManagerFactory entityManagerFactory;
+    private static final String PERSISTENT_UNIT = "taskmanager";
 
-    static {
-        try {
-            entityManagerFactory = Persistence.createEntityManagerFactory("taskmanager");
-        } catch (Throwable ex) {
-            System.err.println("EntityManager factory creation has an error occured! " + ex);
-            throw new ExceptionInInitializerError(ex);
+    public static EntityManagerFactory getEntityManagerFactory() {
+        if (entityManagerFactory == null) {
+            entityManagerFactory = Persistence.createEntityManagerFactory(PERSISTENT_UNIT);
         }
-    }
-    
-    public EntityManagerFactory getEntityManagerFactory() {
         return entityManagerFactory;
     }
-    
-    public static void close(){
-        entityManagerFactory.close();
+
+    public static void shutDown() {
+        if (entityManagerFactory != null) {
+            entityManagerFactory.close();
+        }
     }
 }

@@ -8,6 +8,7 @@ import hu.mycompany.taskmanager.util.TimeUtil;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,9 +48,7 @@ public class TaskService {
     }
 
     public void finishTask(int taskId) {
-        if (taskDao.existsById(taskId)) {
-            taskDao.finish(taskId);
-        }
+        taskDao.updateIsCompleted(taskId, true);
     }
 
     public boolean isExistsTaskId(int taskId) {
@@ -75,23 +74,30 @@ public class TaskService {
             default:
                 break;
         }
+
+        List<Task> taskList = new ArrayList<>();
         LocalDate date = TimeUtil.parseLocalDate(dateFormat);
-        OffsetDateTime dateTime = date.atStartOfDay(ZoneId.systemDefault()).toOffsetDateTime();
-        List<Task> taskList = taskDao.findAllByAfterCreatedAndIsCompletedAndPriority(
-                dateTime, isCompleted, priority);
-        return convertListToTaskArrayList(taskList);               
+        if (date != null) {
+            OffsetDateTime dateTime = date.atStartOfDay(ZoneId.systemDefault()).toOffsetDateTime();
+            taskList = taskDao.findAllByAfterCreatedAndIsCompletedAndPriority(dateTime, isCompleted, priority);
+        }
+        return convertListToTaskArrayList(taskList);
+    }
+    
+    public void removeTask(int taskId) {
+        taskDao.deleteById(taskId);
     }
 
     private List<String[]> convertListToTaskArrayList(List<Task> taskList) {
         return taskList
                 .stream()
-                .map(task -> new String[]{String.valueOf(
-                     task.getId()),
-                        task.getTitle(),
-                        task.getDescription(),
-                        TimeUtil.formatLocalDateTime(task.getCreatedAt().toLocalDateTime()),
-                        task.isCompleted() ? "Yes" : "No"
-                    })
-                .collect(Collectors.toList());
+                .map(task -> new String[]{
+            String.valueOf(task.getId()),
+            task.getTitle(),
+            task.getDescription(),
+            TimeUtil.formatLocalDateTime(task.getCreatedAt().toLocalDateTime()),
+            task.getPriority().toString(),
+            task.isCompleted() ? "Yes" : "No"
+        }).collect(Collectors.toList());
     }
 }

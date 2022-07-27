@@ -12,8 +12,8 @@ import java.util.Scanner;
 public class Main {
 
     private final static int MAIN_MENU_OPTIONS = 5;
-    private final static int TASK_MENU_OPTIONS = 5;
-    private final static String[] TASK_LIST_HEADER_ARR = new String[]{"ID", "TITLE", "DESCRIPTION", "CREATED AT", "COMPLETED"};
+    private final static int TASK_MENU_OPTIONS = 7;
+    private final static String[] TASK_LIST_HEADER_ARR = new String[]{"ID", "TITLE", "DESCRIPTION", "CREATED AT", "PRIORITY", "COMPLETED"};
     private final static String[] WORKLOG_LIST_HEADER_ARR = new String[]{"WORKED TIME", "FROM - TO", "COMMENT"};
     private final static int TASK_SELECT_EXIT = 0;
 
@@ -52,6 +52,7 @@ public class Main {
                     break;
             }
         } while (selected != MAIN_MENU_OPTIONS);
+        scanner.close();
     }
 
     private static int taskSelectHandler(Scanner scanner, TaskService taskService) {
@@ -85,6 +86,17 @@ public class Main {
                     break;
                 case 4:
                     PrintUtil.printTable(workLogService.getAllByTaskId(taskId), WORKLOG_LIST_HEADER_ARR);
+                    break;
+                case 5:
+                    String workedTime = workLogService.getAllWorkedTime(taskId);
+                    System.out.println("Your Total worked time: " + workedTime);
+                    break;
+                case 6:
+                    String answer = readInputText(scanner, "Are u sure? Y/N");
+                    if (answer.toUpperCase().equals("Y")) {
+                        taskService.removeTask(taskId);
+                        taskSubmenuSelect = TASK_MENU_OPTIONS;
+                    }
                     break;
                 default:
                     break;
@@ -166,7 +178,9 @@ public class Main {
         System.out.println("[2] --- Finish worktime");
         System.out.println("[3] --- Close Task");
         System.out.println("[4] --- View Worklogs");
-        System.out.println("[5] --- Back to Main menu---");
+        System.out.println("[5] --- View Worked Time");
+        System.out.println("[6] --- Delete Task");
+        System.out.println("[7] --- Back to Main menu---");
         System.out.println("----------------------------");
     }
 
